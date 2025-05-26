@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Shop Spot</title> <!-- SVG cart will be added by JS to header -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* --- Global Styles & Theme --- */
+        :root {
+            --primary-bg: #FFFFFF;
+            --pastel-pink: #F8C8DC;
+            --pastel-mint: #B2EBF2;
+            --pastel-blue: #A7D8DE;
+            --pastel-lavender: #E6E6FA;
+            --text-color: #333333;
+            --text-light: #666666;
+            --border-color: #E0E0E0;
+            --shadow: 0 2px 6px rgba(0,0,0,0.08);
+            --premium-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            --icon-color: var(--text-color);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            background-color: var(--primary-bg); /* Ensure bg color for notch areas */
+        }
+
+        body {
+            font-family: var(--premium-font);
+            margin: 0;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .app-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        /* --- Header --- */
+        .app-header {
+            background-color: var(--pastel-blue);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-header .app-title-text {
+             margin-right: 8px; /* Space before cart icon */
+        }
+        .app-header svg { /* Cart icon in header */
+            width: 1.2em; height: 1.2em;
+            fill: white;
+            vertical-align: -0.15em;
+        }
+
+
+        /* --- Ad Placeholders --- */
+        .adsterra-banner {
+            background-color: #f0f0f0;
+            color: #999;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8em;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .adsterra-banner.bottom {
+            border-top: 1px solid var(--border-color);
+            border-bottom: none;
+            margin-top: auto;
+        }
+
+
+        /* --- Navigation --- */
+        .app-nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--pastel-lavender);
+            padding: 0;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .nav-button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: none;
+            padding: 10px 12px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 0;
+            transition: background-color 0.2s, color 0.2s;
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .nav-button svg {
+            width: 1.2em; height: 1.2em;
+            fill: currentColor;
+        }
+
+        .nav-button:hover, .nav-button.active {
+            background-color: rgba(0,0,0,0.05);
+            color: var(--pastel-blue);
+            font-weight: 600;
+        }
+
+        /* --- Screens --- */
+        .screen {
+            display: none;
+            padding: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+        .screen h2.screen-title {
+            font-size: 1.3em;
+            color: var(--pastel-blue);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* --- List Styles --- */
+        .list-card, .history-list-card {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .list-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .list-card-clickable-area {
+            cursor: pointer;
+            display: block;
+        }
+        .list-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .list-card-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            word-break: break-word;
+            color: var(--text-color);
+        }
+        .list-card-meta {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+        .list-actions button, .item-actions button, .list-detail-actions button, .btn-header-icon {
+            margin-left: 5px;
+            background: none;
+            border: none;
+            font-size: 1.3em;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--text-light);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .list-actions button svg, .item-actions button svg, .list-detail-actions button svg, .btn-header-icon svg {
+            width: 1em; height: 1em; fill: currentColor;
+        }
+        .list-actions button:hover, .item-actions button:hover, .list-detail-actions button:hover, .btn-header-icon:hover {
+            color: var(--pastel-pink);
+        }
+
+
+        /* --- Item Styles (Inside List Detail) --- */
+        #itemsContainer {
+            flex-grow: 1;
+        }
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .item-row:last-child {
+            border-bottom: none;
+        }
+        .item-tickbox {
+            margin-right: 12px;
+            transform: scale(1.5);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .item-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .item-name {
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .item-weight {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+        .item-price-display {
+            font-size: 0.85em;
+            color: var(--pastel-mint);
+            font-weight: 500;
+        }
+        .item-purchased .item-name, .item-purchased .item-weight {
+            text-decoration: line-through;
+            color: #b0b0b0;
+        }
+        .item-actions {
+            flex-shrink: 0;
+            display: flex;
+        }
+
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn svg {
+            width: 1.1em; height: 1.1em; fill: currentColor;
+        }
+        .btn:first-child {
+            margin-top: 0;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: var(--pastel-mint);
+            color: var(--text-color);
+        }
+        .btn-primary:hover {
+            background-color: #90d9e0;
+        }
+        .btn-secondary {
+            background-color: var(--pastel-pink);
+            color: var(--text-color);
+        }
+         .btn-secondary:hover {
+            background-color: #f0a0b9;
+        }
+        .btn-danger {
+            background-color: #ff7b7b;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #e05252;
+        }
+
+        #showAddItemModalBtn {
+            margin-top: 15px;
+            width: auto;
+            padding: 10px 25px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        .fab {
+            position: fixed;
+            bottom: 75px; /* Space for bottom ad banner */
+            right: 15px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.8em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fab svg {
+            width: 1em; height: 1em;
+        }
+
+        /* --- Pop-ups (Modals) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .modal-content {
+            background-color: var(--primary-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--pastel-blue);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-header svg {
+            width: 1.2em; height: 1.2em; fill: currentColor;
+        }
+        .modal-body {
+            margin-bottom: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .modal-body p {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        .modal-footer {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .modal-footer .btn {
+            width: 100%;
+            margin-left: 0;
+        }
+
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus {
+            border-color: var(--pastel-blue);
+            box-shadow: 0 0 0 2px rgba(167, 216, 222, 0.5);
+            outline: none;
+        }
+
+
+        /* --- List Detail Screen Specifics --- */
+        #listDetailScreen .screen-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .btn-header-icon { /* Back button styling */
+            background: none;
+            border: none;
+            color: var(--pastel-blue); /* Match title color for consistency */
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+        }
+         .btn-header-icon svg { display: block; }
+
+        #listDetailScreen .list-detail-title {
+            flex-grow: 1;
+            font-size: 1.4em;
+            color: var(--pastel-blue);
+            font-weight: 600;
+            margin: 0;
+            word-break: break-word;
+            text-align: left; /* Keep it left aligned */
+        }
+        #listDetailScreen .list-detail-actions {
+            display: flex;
+            align-items: center;
+            margin-left: auto; /* Push actions to the far right */
+        }
+        #listDetailScreen .list-detail-actions button {
+            margin-left: 8px; /* Space between action icons */
+            font-size: 1.4em; /* Slightly larger icons */
+        }
+
+        .total-price-section {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: var(--pastel-lavender);
+            border-radius: 8px;
+            text-align: right;
+            font-size: 1.1em;
+            font-weight: 600;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .total-price-section svg {
+            width: 1.2em; height: 1.2em; fill: currentColor;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .placeholder-text {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+            font-size: 0.95em;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header" id="appHeader">
+            <span class="app-title-text">Shop Spot</span>
+            <!-- Cart SVG will be appended by JS -->
+        </header>
+        <div class="adsterra-banner">Adsterra Banner Space</div>
+
+        <nav class="app-nav">
+            <button class="nav-button active" id="navMyLists">
+                <!-- SVG --> My Lists
+            </button>
+            <button class="nav-button" id="navHistory">
+                <!-- SVG --> History
+            </button>
+        </nav>
+
+        <!-- Screen: My Lists -->
+        <section id="myListsScreen" class="screen active">
+            <h2 class="screen-title">My Shopping Lists</h2>
+            <div id="listsContainer">
+                <p class="placeholder-text">No lists yet. Create one!</p>
+            </div>
+            <button class="btn btn-primary fab" id="showAddListModalBtn" aria-label="Create New List">
+                <!-- Add Icon SVG -->
+            </button>
+        </section>
+
+        <!-- Screen: List Detail -->
+        <section id="listDetailScreen" class="screen">
+            <div class="screen-header">
+                <button id="backToListsBtn" class="btn-header-icon" title="Back to My Lists" aria-label="Back to My Lists">
+                    <!-- Back Arrow SVG -->
+                </button>
+                <h2 id="listDetailName" class="list-detail-title">List Name</h2>
+                <div class="list-detail-actions">
+                    <button id="editListNameBtn" title="Edit List Name" aria-label="Edit List Name"><!-- Edit SVG --></button>
+                    <button id="downloadListPdfBtn" title="Download PDF" aria-label="Download PDF"><!-- Download SVG --></button>
+                    <button id="deleteListBtn" title="Delete List" aria-label="Delete List"><!-- Delete SVG --></button>
+                </div>
+            </div>
+            <div id="itemsContainer">
+                <p class="placeholder-text">No items in this list yet. Add some!</p>
+            </div>
+            <button class="btn btn-primary" id="showAddItemModalBtn" style="margin-top: 15px;">
+                <!-- Add Icon SVG --> Add Item to List
+            </button>
+            <div class="total-price-section" id="totalPriceSection">
+                <!-- Shopping Bag SVG --> Total Price: $0.00
+            </div>
+        </section>
+
+        <!-- Screen: History -->
+        <section id="historyScreen" class="screen">
+            <h2 class="screen-title">Shopping History</h2>
+            <div id="historyListsContainer">
+                <p class="placeholder-text">No lists in history.</p>
+            </div>
+        </section>
+
+        <!-- --- Modals --- -->
+
+        <div id="listNameModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-header" id="listNameModalTitle"><!-- Add/Edit SVG --> Add New List</h3>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="listNameInput">List Name:</label>
+                        <input type="text" id="listNameInput" placeholder="e.g., Weekly Groceries">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="saveListNameBtn"><!-- Save SVG --> Save List</button>
+                    <button class="btn btn-secondary" id="cancelListNameBtn"><!-- Cross SVG --> Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="itemModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-header" id="itemModalTitle"><!-- Add/Edit SVG --> Add New Item</h3>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="itemNameInput">Item Name:</label>
+                        <input type="text" id="itemNameInput" placeholder="e.g., Apples">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemWeightInput">Weight/Quantity:</label>
+                        <input type="text" id="itemWeightInput" placeholder="e.g., 1kg, 2 packs">
+                    </div>
+                    <div class="form-group hidden" id="itemPriceGroup">
+                        <label for="itemPriceInputModal">Price (optional):</label>
+                        <input type="number" id="itemPriceInputModal" placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                     <button class="btn btn-primary" id="saveItemBtn"><!-- Cart/Add SVG --> Add Item</button>
+                    <button class="btn btn-secondary" id="cancelItemBtn"><!-- Cross SVG --> Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="priceModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-header" id="priceModalHeader"><!-- Price Tag SVG --> Enter Item Price</h3>
+                <div class="modal-body">
+                    <p id="priceModalItemName">Item: </p>
+                    <div class="form-group">
+                        <label for="itemPriceTickInput">Price:</label>
+                        <input type="number" id="itemPriceTickInput" placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="savePriceBtn"><!-- Check SVG --> Add Price</button>
+                    <button class="btn btn-secondary" id="cancelPriceBtn"><!-- Cross SVG --> Skip</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirmModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-header" id="confirmModalHeader"><!-- Delete/Restore SVG --> Confirm Action</h3>
+                <div class="modal-body">
+                    <p id="confirmMessage">Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="confirmActionBtn"><!-- Check SVG --> Yes</button>
+                    <button class="btn btn-secondary" id="cancelActionBtn"><!-- Cross SVG --> No</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="adsterra-banner bottom">Adsterra Banner Space</div>
+    </div> <!-- .app-container -->
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const svgIcons = {
+                add: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>',
+                edit: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>',
+                delete: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>',
+                download: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>',
+                cart: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zm-1.45-5c.59 0 1.09-.22 1.45-.59L21.71 5.41c.27-.27.36-.66.25-1.02-.11-.37-.44-.64-.84-.64H4.41l-.94-2H1v2h2l3.6 7.59L5.25 14.03c-.24.45-.03.97.42 1.21.13.07.27.1.4.1h10c.66 0 1.2-.54 1.2-1.2 0-.33-.13-.63-.34-.86L15.55 13z"></path></svg>',
+                backArrow: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>',
+                list: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"></path></svg>',
+                history: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2.5c0-.28-.22-.5-.5-.5H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-.28-.22-.5-.5-.5H14v-5zM18 20H6V4h7v5h5v11zM8 17h8v-2H8v2zm0-4h8v-2H8v2z"></path></svg>', // Adjusted history icon
+                restore: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12z"></path></svg>',
+                check: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>',
+                cross: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>',
+                save: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"></path></svg>',
+                priceTag: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.22-1.05-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"></path></svg>',
+                shoppingBag: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 14H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v10z"></path></svg>'
+            };
+
+            // --- State Variables ---
+            let lists = [];
+            let historyLists = [];
+            let currentListId = null;
+            let editingListId = null;
+            let editingItemId = null;
+            let itemToPriceId = null;
+            let actionCallback = null;
+
+            // --- DOM Elements ---
+            const appHeaderEl = document.getElementById('appHeader');
+            const screens = {
+                myLists: document.getElementById('myListsScreen'),
+                listDetail: document.getElementById('listDetailScreen'),
+                history: document.getElementById('historyScreen'),
+            };
+            const navButtons = {
+                myLists: document.getElementById('navMyLists'),
+                history: document.getElementById('navHistory'),
+            };
+
+            const listsContainer = document.getElementById('listsContainer');
+            const showAddListModalBtn = document.getElementById('showAddListModalBtn');
+
+            const backToListsBtn = document.getElementById('backToListsBtn');
+            const listDetailNameEl = document.getElementById('listDetailName');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const showAddItemModalBtnListDetail = document.getElementById('showAddItemModalBtn');
+            const totalPriceSection = document.getElementById('totalPriceSection');
+            const editListNameBtn = document.getElementById('editListNameBtn');
+            const downloadListPdfBtn = document.getElementById('downloadListPdfBtn');
+            const deleteListBtn = document.getElementById('deleteListBtn');
+
+            const historyListsContainer = document.getElementById('historyListsContainer');
+
+            const listNameModal = document.getElementById('listNameModal');
+            const listNameModalTitle = document.getElementById('listNameModalTitle');
+            const listNameInput = document.getElementById('listNameInput');
+            const saveListNameBtn = document.getElementById('saveListNameBtn');
+            const cancelListNameBtn = document.getElementById('cancelListNameBtn');
+
+            const itemModal = document.getElementById('itemModal');
+            const itemModalTitle = document.getElementById('itemModalTitle');
+            const itemNameInput = document.getElementById('itemNameInput');
+            const itemWeightInput = document.getElementById('itemWeightInput');
+            const itemPriceGroup = document.getElementById('itemPriceGroup');
+            const itemPriceInputModal = document.getElementById('itemPriceInputModal');
+            const saveItemBtn = document.getElementById('saveItemBtn');
+            const cancelItemBtn = document.getElementById('cancelItemBtn');
+
+            const priceModal = document.getElementById('priceModal');
+            const priceModalItemName = document.getElementById('priceModalItemName');
+            const priceModalHeader = priceModal.querySelector('.modal-header');
+            const itemPriceTickInput = document.getElementById('itemPriceTickInput');
+            const savePriceBtn = document.getElementById('savePriceBtn');
+            const cancelPriceBtn = document.getElementById('cancelPriceBtn');
+
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmModalHeaderEl = document.getElementById('confirmModalHeader');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            const cancelActionBtn = document.getElementById('cancelActionBtn');
+
+            const { jsPDF } = window.jspdf;
+
+            // --- Icon Injection Function ---
+            function setButtonIcon(buttonElement, iconName, textBefore = '', textAfter = '') {
+                if (buttonElement && svgIcons[iconName]) {
+                    buttonElement.innerHTML = `${textBefore ? textBefore + ' ' : ''}${svgIcons[iconName]}${textAfter ? ' ' + textAfter : ''}`;
+                } else if (buttonElement && textBefore === '' && textAfter === '') { // Only icon
+                     buttonElement.innerHTML = svgIcons[iconName] || '';
+                }
+            }
+             function setElementIcon(element, iconName, position = 'prepend', textContent = null) {
+                if (element && svgIcons[iconName]) {
+                    const currentText = textContent !== null ? textContent : element.textContent.trim();
+                    if (position === 'prepend') {
+                        element.innerHTML = svgIcons[iconName] + (currentText ? ' ' + currentText : '');
+                    } else {
+                        element.innerHTML = (currentText ? currentText + ' ' : '') + svgIcons[iconName];
+                    }
+                }
+            }
+
+
+            // --- Initialize Icons ---
+            function initializeStaticIcons() {
+                setElementIcon(appHeaderEl.querySelector('.app-title-text'), 'cart', 'append', 'Shop Spot'); // Target text span
+                setButtonIcon(navButtons.myLists, 'list', '', 'My Lists');
+                setButtonIcon(navButtons.history, 'history', '', 'History');
+                setButtonIcon(showAddListModalBtn, 'add');
+                setButtonIcon(backToListsBtn, 'backArrow');
+                setButtonIcon(editListNameBtn, 'edit');
+                setButtonIcon(downloadListPdfBtn, 'download');
+                setButtonIcon(deleteListBtn, 'delete');
+                setButtonIcon(showAddItemModalBtnListDetail, 'add', '', 'Add Item to List');
+                // For total price, we update it dynamically, so static icon here isn't best.
+                // Let updateTotalPrice handle its full content including SVG.
+                // setElementIcon(totalPriceSection, 'shoppingBag', 'prepend', 'Total Price: $0.00');
+                totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $0.00`;
+
+
+                setButtonIcon(saveListNameBtn, 'save', '', 'Save List'); // Initial text
+                setButtonIcon(cancelListNameBtn, 'cross', '', 'Cancel');
+                setButtonIcon(saveItemBtn, 'add', '', 'Add Item'); // Initial text
+                setButtonIcon(cancelItemBtn, 'cross', '', 'Cancel');
+                setElementIcon(priceModalHeader, 'priceTag', 'prepend', 'Enter Item Price');
+                setButtonIcon(savePriceBtn, 'check', '', 'Add Price');
+                setButtonIcon(cancelPriceBtn, 'cross', '', 'Skip');
+                setButtonIcon(confirmActionBtn, 'check', '', 'Yes'); // Default for confirm
+                setButtonIcon(cancelActionBtn, 'cross', '', 'No'); // Default for confirm
+            }
+
+
+            // --- Utility Functions ---
+            const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
+            const displayModal = (modalEl) => { modalEl.style.display = 'flex'; };
+            const hideModal = (modalEl) => { modalEl.style.display = 'none'; };
+
+            // --- Local Storage ---
+            const loadData = () => {
+                const storedLists = localStorage.getItem('shopSpotListsV3');
+                const storedHistory = localStorage.getItem('shopSpotHistoryV3');
+                lists = storedLists ? JSON.parse(storedLists) : [];
+                historyLists = storedHistory ? JSON.parse(storedHistory) : [];
+            };
+
+            const saveData = () => {
+                localStorage.setItem('shopSpotListsV3', JSON.stringify(lists));
+                localStorage.setItem('shopSpotHistoryV3', JSON.stringify(historyLists));
+            };
+
+            // --- Screen Navigation ---
+            const navigateTo = (screenName) => {
+                Object.values(screens).forEach(screen => screen.classList.remove('active'));
+                Object.values(navButtons).forEach(button => button.classList.remove('active'));
+                screens[screenName].classList.add('active');
+                if (navButtons[screenName]) navButtons[screenName].classList.add('active');
+                currentListId = (screenName === 'listDetail') ? currentListId : null;
+                showAddListModalBtn.style.display = (screenName === 'myLists') ? 'flex' : 'none';
+            };
+
+            // --- Rendering Functions ---
+            const renderMyLists = () => {
+                listsContainer.innerHTML = '';
+                if (lists.length === 0) {
+                    listsContainer.innerHTML = '<p class="placeholder-text">No lists yet. Create one!</p>';
+                    return;
+                }
+                lists.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
+                lists.forEach(list => {
+                    const purchasedItems = list.items.filter(item => item.purchased).length;
+                    const card = document.createElement('div');
+                    card.className = 'list-card';
+                    card.dataset.listId = list.id;
+
+                    const clickableArea = document.createElement('div');
+                    clickableArea.className = 'list-card-clickable-area';
+                    clickableArea.innerHTML = `
+                        <div class="list-card-header">
+                            <span class="list-card-name">${list.name}</span>
+                        </div>
+                        <div class="list-card-meta">
+                            ${list.items.length} items / ${purchasedItems} purchased
+                        </div>
+                    `;
+                    clickableArea.addEventListener('click', () => openListDetail(list.id));
+
+                    const listActionsDiv = document.createElement('div');
+                    listActionsDiv.className = 'list-actions';
+                    const editBtn = document.createElement('button');
+                    editBtn.title = "Edit Name";
+                    setButtonIcon(editBtn, 'edit');
+                    editBtn.addEventListener('click', (e) => { e.stopPropagation(); showEditListNameModal(list.id); });
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.title = "Delete List";
+                    setButtonIcon(deleteBtn, 'delete');
+                    deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); confirmDeleteList(list.id, list.name); });
+                    listActionsDiv.appendChild(editBtn);
+                    listActionsDiv.appendChild(deleteBtn);
+
+                    clickableArea.querySelector('.list-card-header').appendChild(listActionsDiv);
+                    card.appendChild(clickableArea);
+                    listsContainer.appendChild(card);
+                });
+            };
+
+            const renderListDetail = () => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                if (!list) {
+                    navigateTo('myLists');
+                    return;
+                }
+
+                listDetailNameEl.textContent = list.name;
+                itemsContainer.innerHTML = '';
+                if (list.items.length === 0) {
+                    itemsContainer.innerHTML = '<p class="placeholder-text">No items in this list yet. Add some!</p>';
+                } else {
+                    list.items.forEach(item => {
+                        const itemRow = document.createElement('div');
+                        itemRow.className = `item-row ${item.purchased ? 'item-purchased' : ''}`;
+                        itemRow.dataset.itemId = item.id;
+                        itemRow.innerHTML = `
+                            <input type="checkbox" class="item-tickbox" ${item.purchased ? 'checked' : ''} aria-label="Mark ${item.name} as purchased">
+                            <div class="item-details">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-weight">${item.weight}</span>
+                                ${item.price !== null ? `<span class="item-price-display">$${parseFloat(item.price).toFixed(2)}</span>` : ''}
+                            </div>
+                            <div class="item-actions">
+                                <button class="edit-item-btn" title="Edit Item" aria-label="Edit ${item.name}">${svgIcons.edit}</button>
+                                <button class="delete-item-btn" title="Delete Item" aria-label="Delete ${item.name}">${svgIcons.delete}</button>
+                            </div>
+                        `;
+                        itemRow.querySelector('.item-tickbox').addEventListener('change', (e) => {
+                            toggleItemPurchased(item.id, e.target.checked);
+                        });
+                        itemRow.querySelector('.edit-item-btn').addEventListener('click', () => showEditItemModal(item.id));
+                        itemRow.querySelector('.delete-item-btn').addEventListener('click', () => confirmDeleteItem(item.id, item.name));
+                        itemsContainer.appendChild(itemRow);
+                    });
+                }
+                updateTotalPrice();
+            };
+
+            const renderHistoryLists = () => {
+                historyListsContainer.innerHTML = '';
+                if (historyLists.length === 0) {
+                    historyListsContainer.innerHTML = '<p class="placeholder-text">No lists in history.</p>';
+                    return;
+                }
+                historyLists.sort((a,b) => b.archivedAt - a.archivedAt);
+                historyLists.forEach(list => {
+                    const card = document.createElement('div');
+                    card.className = 'history-list-card';
+                    card.innerHTML = `
+                        <div class="list-card-header">
+                            <span class="list-card-name">${list.name}</span>
+                            <div class="list-actions">
+                                <button class="restore-list-btn" title="Restore List" aria-label="Restore ${list.name}">${svgIcons.restore}</button>
+                                <button class="perm-delete-list-btn" title="Delete Permanently" aria-label="Delete ${list.name} permanently">${svgIcons.delete}</button>
+                            </div>
+                        </div>
+                        <div class="list-card-meta">
+                            Archived: ${new Date(list.archivedAt).toLocaleDateString()} - ${list.items.length} items
+                        </div>
+                         <div class="history-items-preview hidden" style="font-size:0.8em; margin-top: 5px; padding-left:10px; color: var(--text-light);">
+                            ${list.items.map(i => `<div>- ${i.name} (${i.weight}) ${i.price ? '$'+parseFloat(i.price).toFixed(2) : ''}</div>`).join('') || 'No items recorded.'}
+                        </div>
+                    `;
+                    card.querySelector('.list-card-name').addEventListener('click', () => {
+                        card.querySelector('.history-items-preview').classList.toggle('hidden');
+                    });
+                     card.querySelector('.restore-list-btn').addEventListener('click', () => {
+                        confirmAction(
+                            'Restore List?',
+                            `Restore "${list.name}" to your active lists?`,
+                            'Yes, Restore',
+                            () => restoreList(list.id),
+                            'restore' // icon for confirm header
+                        );
+                    });
+                    card.querySelector('.perm-delete-list-btn').addEventListener('click', () => confirmPermanentDelete(list.id, list.name));
+                    historyListsContainer.appendChild(card);
+                });
+            };
+
+            // --- Update Total Price ---
+            const updateTotalPrice = () => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                if (!list) return;
+
+                const total = list.items.reduce((sum, item) => {
+                    return sum + (item.price && item.purchased ? parseFloat(item.price) : 0);
+                }, 0);
+                totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $${total.toFixed(2)}`;
+            };
+
+            // --- Modal Openers ---
+            const showAddListModal = () => {
+                editingListId = null;
+                setElementIcon(listNameModalTitle, 'add', 'prepend', 'Add New List');
+                listNameInput.value = '';
+                setButtonIcon(saveListNameBtn, 'save', '', 'Save List');
+                displayModal(listNameModal);
+                listNameInput.focus();
+            };
+
+            const showEditListNameModal = (listId) => {
+                const list = lists.find(l => l.id === listId);
+                if (!list) return;
+                editingListId = listId;
+                setElementIcon(listNameModalTitle, 'edit', 'prepend', 'Edit List Name');
+                listNameInput.value = list.name;
+                setButtonIcon(saveListNameBtn, 'save', '', 'Save Changes');
+                displayModal(listNameModal);
+                listNameInput.focus();
+            };
+            
+            editListNameBtn.addEventListener('click', () => {
+                if (currentListId) showEditListNameModal(currentListId);
+            });
+
+
+            const showAddItemModal = () => {
+                editingItemId = null;
+                setElementIcon(itemModalTitle, 'add', 'prepend', 'Add New Item');
+                itemNameInput.value = '';
+                itemWeightInput.value = '';
+                itemPriceInputModal.value = '';
+                itemPriceGroup.classList.add('hidden');
+                setButtonIcon(saveItemBtn, 'add', '', 'Add Item');
+                displayModal(itemModal);
+                itemNameInput.focus();
+            };
+
+            const showEditItemModal = (itemId) => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                const item = list.items.find(i => i.id === itemId);
+                if (!item) return;
+
+                editingItemId = itemId;
+                setElementIcon(itemModalTitle, 'edit', 'prepend', 'Edit Item');
+                itemNameInput.value = item.name;
+                itemWeightInput.value = item.weight;
+                itemPriceInputModal.value = item.price !== null ? parseFloat(item.price).toFixed(2) : '';
+                itemPriceGroup.classList.remove('hidden');
+                setButtonIcon(saveItemBtn, 'save', '', 'Save Changes');
+                displayModal(itemModal);
+                itemNameInput.focus();
+            };
+
+            const showPriceModal = (itemId) => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                const item = list.items.find(i => i.id === itemId);
+                if (!item) return;
+
+                itemToPriceId = itemId;
+                priceModalItemName.textContent = `Item: ${item.name} (${item.weight})`;
+                itemPriceTickInput.value = item.price !== null ? parseFloat(item.price).toFixed(2) : '';
+                displayModal(priceModal);
+                itemPriceTickInput.focus();
+            };
+
+            const confirmAction = (headerText, message, confirmBtnText, callback, icon = 'delete', confirmBtnIcon = 'check') => {
+                setElementIcon(confirmModalHeaderEl, icon, 'prepend', headerText);
+                confirmMessage.textContent = message;
+                setButtonIcon(confirmActionBtn, confirmBtnIcon, '', confirmBtnText);
+                actionCallback = callback;
+                displayModal(confirmModal);
+            };
+
+            // --- List Operations ---
+            const saveList = () => {
+                const name = listNameInput.value.trim();
+                if (!name) { alert('List name cannot be empty!'); return; }
+                const now = Date.now();
+                if (editingListId) { 
+                    const list = lists.find(l => l.id === editingListId);
+                    if (list) { list.name = name; list.updatedAt = now; }
+                } else { 
+                    const newList = { id: generateId(), name: name, items: [], createdAt: now, updatedAt: now };
+                    lists.push(newList);
+                }
+                saveData(); renderMyLists();
+                if (currentListId === editingListId && editingListId) renderListDetail();
+                hideModal(listNameModal); editingListId = null;
+            };
+
+            const openListDetail = (listId) => {
+                currentListId = listId; renderListDetail(); navigateTo('listDetail');
+            };
+
+            const confirmDeleteList = (listId, listName) => {
+                confirmAction(
+                    'Delete List?', `Move "${listName}" to History?`, 'Yes, Delete',
+                    () => {
+                        const listIndex = lists.findIndex(l => l.id === listId);
+                        if (listIndex > -1) {
+                            const [listToArchive] = lists.splice(listIndex, 1);
+                            listToArchive.archivedAt = Date.now(); historyLists.unshift(listToArchive); 
+                            saveData(); renderMyLists();
+                            if (currentListId === listId) navigateTo('myLists');
+                        }
+                    }, 'delete'
+                );
+            };
+            
+            deleteListBtn.addEventListener('click', () => {
+                 if (currentListId) {
+                    const list = lists.find(l => l.id === currentListId);
+                    if (list) confirmDeleteList(list.id, list.name);
+                }
+            });
+
+
+            // --- Item Operations ---
+            const saveItem = () => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                if (!list) return;
+                const name = itemNameInput.value.trim();
+                const weight = itemWeightInput.value.trim();
+                let price = itemPriceInputModal.value.trim();
+                if (!name || !weight) { alert('Item name and weight/quantity are required!'); return; }
+
+                if (editingItemId) { 
+                    const item = list.items.find(i => i.id === editingItemId);
+                    if (item) {
+                        item.name = name; item.weight = weight;
+                        item.price = price !== '' ? parseFloat(price) : item.price;
+                    }
+                } else { 
+                    const newItem = { id: generateId(), name, weight, price: null, purchased: false };
+                    list.items.push(newItem);
+                }
+                list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
+                hideModal(itemModal); editingItemId = null;
+            };
+
+            const toggleItemPurchased = (itemId, isChecked) => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                const item = list.items.find(i => i.id === itemId);
+                if (!item) return;
+                item.purchased = isChecked;
+                if (isChecked && item.price === null) { showPriceModal(itemId); }
+                list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists(); 
+            };
+
+            const saveItemPriceFromTick = () => {
+                if (!currentListId || !itemToPriceId) return;
+                const list = lists.find(l => l.id === currentListId);
+                const item = list.items.find(i => i.id === itemToPriceId);
+                if (!item) return;
+                const price = itemPriceTickInput.value.trim();
+                item.price = price !== '' ? parseFloat(price) : null;
+                list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
+                hideModal(priceModal); itemToPriceId = null;
+            };
+
+            const confirmDeleteItem = (itemId, itemName) => {
+                if (!currentListId) return;
+                confirmAction( 'Delete Item?', `Remove "${itemName}" from this list?`, 'Yes, Delete',
+                    () => {
+                        const list = lists.find(l => l.id === currentListId);
+                        if (list) {
+                            list.items = list.items.filter(i => i.id !== itemId);
+                            list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists(); 
+                        }
+                    }, 'delete'
+                );
+            };
+
+            // --- History Operations ---
+            const restoreList = (listId) => {
+                const listIndex = historyLists.findIndex(l => l.id === listId);
+                if (listIndex > -1) {
+                    const [listToRestore] = historyLists.splice(listIndex, 1);
+                    delete listToRestore.archivedAt; listToRestore.updatedAt = Date.now();
+                    lists.push(listToRestore); saveData(); renderHistoryLists(); renderMyLists();
+                }
+            };
+
+            const confirmPermanentDelete = (listId, listName) => {
+                confirmAction(
+                    'PERMANENTLY DELETE?', `"${listName}" will be gone forever. This cannot be undone.`,
+                    'Yes, Delete Forever',
+                    () => {
+                        historyLists = historyLists.filter(l => l.id !== listId);
+                        saveData(); renderHistoryLists();
+                    }, 'delete' 
+                );
+                confirmActionBtn.classList.remove('btn-primary', 'btn-secondary');
+                confirmActionBtn.classList.add('btn-danger');
+                setButtonIcon(confirmActionBtn, 'delete', '', 'Yes, Delete Forever');
+            };
+
+
+            // --- PDF Download ---
+            const downloadPDF = () => {
+                if (!currentListId) return;
+                const list = lists.find(l => l.id === currentListId);
+                if (!list) return;
+
+                const doc = new jsPDF();
+                doc.setFontSize(18);
+                doc.text(list.name, 14, 20); // Only list name as title
+                doc.setFontSize(10);
+                let yPos = 30;
+                const pageHeight = doc.internal.pageSize.height;
+                const margin = 15;
+                let itemNumber = 1; // Serial number for items
+
+                list.items.forEach(item => {
+                    if (yPos > pageHeight - margin - 10) {
+                        doc.addPage();
+                        yPos = margin;
+                    }
+                    const purchasedMark = item.purchased ? '[X]' : '[ ]';
+                    let priceText = '';
+                    if (item.price !== null) {
+                        priceText = item.purchased ? ` - $${parseFloat(item.price).toFixed(2)}` : ` (Est: $${parseFloat(item.price).toFixed(2)})`;
+                    }
+                    
+                    let itemLine = `${itemNumber}. ${purchasedMark} ${item.name} (${item.weight})${priceText}`;
+                    const lines = doc.splitTextToSize(itemLine, doc.internal.pageSize.width - (margin * 2));
+                    doc.text(lines, margin, yPos);
+                    yPos += (lines.length * 5);
+                    itemNumber++;
+                });
+
+                yPos += 10;
+                 if (yPos > pageHeight - margin - 10) { doc.addPage(); yPos = margin; }
+                const total = list.items.reduce((sum, item) => sum + (item.price && item.purchased ? parseFloat(item.price) : 0), 0);
+                doc.setFontSize(12);
+                // REMOVED EMOJI FROM HERE
+                doc.text(`Total Purchased Price: $${total.toFixed(2)}`, margin, yPos);
+
+                doc.save(`${list.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_list.pdf`); // Sanitize filename
+            };
+
+            // --- Event Listeners ---
+            navButtons.myLists.addEventListener('click', () => navigateTo('myLists'));
+            navButtons.history.addEventListener('click', () => { renderHistoryLists(); navigateTo('history'); });
+            backToListsBtn.addEventListener('click', () => navigateTo('myLists'));
+
+            showAddListModalBtn.addEventListener('click', showAddListModal);
+            saveListNameBtn.addEventListener('click', saveList);
+            cancelListNameBtn.addEventListener('click', () => hideModal(listNameModal));
+
+            showAddItemModalBtnListDetail.addEventListener('click', showAddItemModal);
+            saveItemBtn.addEventListener('click', saveItem);
+            cancelItemBtn.addEventListener('click', () => hideModal(itemModal));
+
+            savePriceBtn.addEventListener('click', saveItemPriceFromTick);
+            cancelPriceBtn.addEventListener('click', () => { hideModal(priceModal); itemToPriceId = null; });
+
+            confirmActionBtn.addEventListener('click', () => {
+                if (actionCallback) actionCallback();
+                hideModal(confirmModal); actionCallback = null;
+                confirmActionBtn.classList.remove('btn-danger');
+                confirmActionBtn.classList.add('btn-primary');
+                setButtonIcon(confirmActionBtn, 'check', '', 'Yes');
+            });
+            cancelActionBtn.addEventListener('click', () => {
+                hideModal(confirmModal); actionCallback = null;
+                confirmActionBtn.classList.remove('btn-danger');
+                confirmActionBtn.classList.add('btn-primary');
+                setButtonIcon(confirmActionBtn, 'check', '', 'Yes');
+            });
+
+            downloadListPdfBtn.addEventListener('click', downloadPDF);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    [listNameModal, itemModal, priceModal, confirmModal].forEach(hideModal);
+                }
+            });
+            [listNameModal, itemModal, priceModal, confirmModal].forEach(modal => {
+                modal.addEventListener('click', (e) => { if (e.target === modal) { hideModal(modal); } });
+            });
+
+            // --- Initial Load ---
+            initializeStaticIcons();
+            loadData();
+            renderMyLists();
+            navigateTo('myLists'); 
+        });
+    </script>
+</body>
+</html>
