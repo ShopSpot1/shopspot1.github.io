@@ -1,0 +1,1 @@
+# shopspot1.github.io
