@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shop Spot</title> <!-- SVG cart will be added by JS to header -->
+    <title>Shop Spot</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* --- Global Styles & Theme --- */
@@ -19,6 +19,8 @@
             --shadow: 0 2px 6px rgba(0,0,0,0.08);
             --premium-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
             --icon-color: var(--text-color);
+            --ad-height: 90px; /* Define ad height as a variable */
+            --fab-initial-bottom: 20px; /* FAB's bottom spacing from viewport edge */
         }
 
         * {
@@ -29,7 +31,7 @@
         html, body {
             height: 100%;
             overflow-x: hidden;
-            background-color: var(--primary-bg); /* Ensure bg color for notch areas */
+            background-color: var(--primary-bg);
         }
 
         body {
@@ -40,6 +42,8 @@
             flex-direction: column;
             font-size: 16px;
             line-height: 1.5;
+            /* Add padding to bottom to prevent content from being hidden by fixed ad initially IF ad wasn't fixed */
+            /* padding-bottom: var(--ad-height); Consider if content needs to scroll past ad area */
         }
 
         .app-container {
@@ -67,35 +71,32 @@
             justify-content: center;
         }
         .app-header .app-title-text {
-             margin-right: 8px; /* Space before cart icon */
+             margin-right: 8px;
         }
-        .app-header svg { /* Cart icon in header */
+        .app-header svg {
             width: 1.2em; height: 1.2em;
             fill: white;
             vertical-align: -0.15em;
         }
 
-
-        /* --- Ad Placeholders --- */
-        .adsterra-banner {
-            /* Styles for the container of the ad */
-            /* background-color: #f0f0f0; /* You might remove this if ads have their own bg */
-            /* color: #999; */ /* You might remove this */
-            text-align: center;
-            /* padding: 10px; */ /* Ad script might control padding */
-            font-size: 0.8em;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
-            /* Ensure the ad itself is centered if it's smaller than the container */
+        /* --- Bottom Ad Placeholder --- */
+        .adsterra-banner.bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--ad-height);
+            background-color: #f0f0f0; /* Placeholder background */
+            border-top: 1px solid var(--border-color);
+            z-index: 998; /* Below FAB */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 90px; /* Ad height */
+            transform: translateY(100%); /* Initially hidden below screen */
+            transition: transform 0.3s ease-in-out;
         }
-        .adsterra-banner.bottom {
-            border-top: 1px solid var(--border-color);
-            border-bottom: none;
-            margin-top: auto;
+        .adsterra-banner.bottom.ad-visible {
+            transform: translateY(0); /* Slide in */
         }
 
 
@@ -143,7 +144,12 @@
             padding: 15px;
             flex-grow: 1;
             overflow-y: auto;
+            /* Add padding to the bottom of scrollable screens to ensure content isn't hidden by FAB */
+            padding-bottom: calc(var(--fab-initial-bottom) + 56px + 15px); /* FAB initial bottom + FAB height + extra space */
         }
+         /* When ad is visible, screen padding might need to account for ad height too if content needs to scroll "under" it.
+           However, since ad is fixed, content will scroll behind it. The FAB adjustment is key. */
+
 
         .screen.active {
             display: flex;
@@ -318,8 +324,8 @@
 
         .fab {
             position: fixed;
-            bottom: 100px; /* Adjusted for potential bottom ad */
             right: 15px;
+            bottom: var(--fab-initial-bottom); /* Initial position */
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -329,6 +335,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: bottom 0.3s ease-in-out; /* Smooth transition for bottom position */
         }
         .fab svg {
             width: 1em; height: 1em;
@@ -429,10 +436,10 @@
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
         }
-        .btn-header-icon { /* Back button styling */
+        .btn-header-icon {
             background: none;
             border: none;
-            color: var(--pastel-blue); /* Match title color for consistency */
+            color: var(--pastel-blue);
             font-size: 1.5em;
             cursor: pointer;
             padding: 5px;
@@ -447,16 +454,16 @@
             font-weight: 600;
             margin: 0;
             word-break: break-word;
-            text-align: left; /* Keep it left aligned */
+            text-align: left;
         }
         #listDetailScreen .list-detail-actions {
             display: flex;
             align-items: center;
-            margin-left: auto; /* Push actions to the far right */
+            margin-left: auto;
         }
         #listDetailScreen .list-detail-actions button {
-            margin-left: 8px; /* Space between action icons */
-            font-size: 1.4em; /* Slightly larger icons */
+            margin-left: 8px;
+            font-size: 1.4em;
         }
 
         .total-price-section {
@@ -494,19 +501,7 @@
             <span class="app-title-text">Shop Spot</span>
             <!-- Cart SVG will be appended by JS -->
         </header>
-        <div class="adsterra-banner">
-            <!-- Adsterra Top Banner Code -->
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : '893de7bca19abaf99c5c6ec6d939880d',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="//www.highperformanceformat.com/893de7bca19abaf99c5c6ec6d939880d/invoke.js"></script>
-        </div>
+        <!-- Top ad banner removed -->
 
         <nav class="app-nav">
             <button class="nav-button active" id="navMyLists">
@@ -523,9 +518,7 @@
             <div id="listsContainer">
                 <p class="placeholder-text">No lists yet. Create one!</p>
             </div>
-            <button class="btn btn-primary fab" id="showAddListModalBtn" aria-label="Create New List">
-                <!-- Add Icon SVG -->
-            </button>
+            <!-- FAB is placed outside scrollable screen content for fixed positioning -->
         </section>
 
         <!-- Screen: List Detail -->
@@ -544,7 +537,7 @@
             <div id="itemsContainer">
                 <p class="placeholder-text">No items in this list yet. Add some!</p>
             </div>
-            <button class="btn btn-primary" id="showAddItemModalBtn" style="margin-top: 15px;">
+            <button class="btn btn-primary" id="showAddItemModalBtnListDetail" style="margin-top: 15px;">
                 <!-- Add Icon SVG --> Add Item to List
             </button>
             <div class="total-price-section" id="totalPriceSection">
@@ -560,8 +553,13 @@
             </div>
         </section>
 
-        <!-- --- Modals --- -->
+        <!-- FAB Button (Now outside screen divs for true fixed positioning relative to viewport) -->
+        <button class="btn btn-primary fab" id="showAddListModalBtn" aria-label="Create New List">
+            <!-- Add Icon SVG -->
+        </button>
 
+
+        <!-- --- Modals --- -->
         <div id="listNameModal" class="modal">
             <div class="modal-content">
                 <h3 class="modal-header" id="listNameModalTitle"><!-- Add/Edit SVG --> Add New List</h3>
@@ -632,14 +630,14 @@
             </div>
         </div>
 
-        <div class="adsterra-banner bottom">
+        <div class="adsterra-banner bottom" id="bottomAdBanner">
             <!-- Adsterra Bottom Banner Code -->
             <script type="text/javascript">
                 atOptions = {
-                    'key' : '893de7bca19abaf99c5c6ec6d939880d',
+                    'key' : '893de7bca19abaf99c5c6ec6d939880d', // Replace with your actual bottom ad key if different
                     'format' : 'iframe',
                     'height' : 90,
-                    'width' : 728,
+                    'width' : 728, // Adsterra typical banner, will be responsive due to container
                     'params' : {}
                 };
             </script>
@@ -647,6 +645,8 @@
         </div>
     </div> <!-- .app-container -->
 
+    <!-- Popunder Ad Script -->
+    <script type='text/javascript' src='//pl26772733.profitableratecpm.com/a8/0e/fa/a80efae800ef51c827eaec930aa2582a.js'></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -675,6 +675,7 @@
             let editingItemId = null;
             let itemToPriceId = null;
             let actionCallback = null;
+            let adIsVisible = false; // Track ad visibility state
 
             // --- DOM Elements ---
             const appHeaderEl = document.getElementById('appHeader');
@@ -689,12 +690,13 @@
             };
 
             const listsContainer = document.getElementById('listsContainer');
-            const showAddListModalBtn = document.getElementById('showAddListModalBtn');
+            const fabButton = document.getElementById('showAddListModalBtn'); // Renamed for clarity
+            const bottomAdBanner = document.getElementById('bottomAdBanner');
 
             const backToListsBtn = document.getElementById('backToListsBtn');
             const listDetailNameEl = document.getElementById('listDetailName');
             const itemsContainer = document.getElementById('itemsContainer');
-            const showAddItemModalBtnListDetail = document.getElementById('showAddItemModalBtn');
+            const showAddItemModalBtnListDetail = document.getElementById('showAddItemModalBtnListDetail'); // The button inside list detail
             const totalPriceSection = document.getElementById('totalPriceSection');
             const editListNameBtn = document.getElementById('editListNameBtn');
             const downloadListPdfBtn = document.getElementById('downloadListPdfBtn');
@@ -733,6 +735,9 @@
             const { jsPDF } = window.jspdf;
 
             // --- Icon Injection Function ---
+            function setButtonIcon(buttonElement, iconName, textBefore = '', textAfter = '') { /* ... same as before ... */ }
+            function setElementIcon(element, iconName, position = 'prepend', textContent = null) { /* ... same as before ... */ }
+             // Icon injection functions (copied from previous version, ensure they are complete here)
             function setButtonIcon(buttonElement, iconName, textBefore = '', textAfter = '') {
                 if (buttonElement && svgIcons[iconName]) {
                     buttonElement.innerHTML = `${textBefore ? textBefore + ' ' : ''}${svgIcons[iconName]}${textAfter ? ' ' + textAfter : ''}`;
@@ -740,7 +745,7 @@
                      buttonElement.innerHTML = svgIcons[iconName] || '';
                 }
             }
-             function setElementIcon(element, iconName, position = 'prepend', textContent = null) {
+            function setElementIcon(element, iconName, position = 'prepend', textContent = null) {
                 if (element && svgIcons[iconName]) {
                     const currentText = textContent !== null ? textContent : element.textContent.trim();
                     if (position === 'prepend') {
@@ -754,26 +759,21 @@
 
             // --- Initialize Icons ---
             function initializeStaticIcons() {
-                // App Header Title with Cart
                 const appTitleTextEl = appHeaderEl.querySelector('.app-title-text');
-                if (appTitleTextEl) {
-                    appTitleTextEl.insertAdjacentHTML('afterend', svgIcons.cart);
-                }
-
+                if (appTitleTextEl) { appTitleTextEl.insertAdjacentHTML('afterend', svgIcons.cart); }
                 setButtonIcon(navButtons.myLists, 'list', '', 'My Lists');
                 setButtonIcon(navButtons.history, 'history', '', 'History');
-                setButtonIcon(showAddListModalBtn, 'add');
+                setButtonIcon(fabButton, 'add'); // FAB button
                 setButtonIcon(backToListsBtn, 'backArrow');
                 setButtonIcon(editListNameBtn, 'edit');
                 setButtonIcon(downloadListPdfBtn, 'download');
                 setButtonIcon(deleteListBtn, 'delete');
                 setButtonIcon(showAddItemModalBtnListDetail, 'add', '', 'Add Item to List');
                 totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $0.00`;
-
-
                 setButtonIcon(saveListNameBtn, 'save', '', 'Save List');
                 setButtonIcon(cancelListNameBtn, 'cross', '', 'Cancel');
                 setButtonIcon(saveItemBtn, 'add', '', 'Add Item');
+                setButtonIcon(cancelItemBtn, 'cross', '', 'Cancel'); // For Item Modal
                 setElementIcon(priceModalHeader, 'priceTag', 'prepend', 'Enter Item Price');
                 setButtonIcon(savePriceBtn, 'check', '', 'Add Price');
                 setButtonIcon(cancelPriceBtn, 'cross', '', 'Skip');
@@ -788,8 +788,11 @@
             const hideModal = (modalEl) => { modalEl.style.display = 'none'; };
 
             // --- Local Storage ---
+            const loadData = () => { /* ... same as before ... */ };
+            const saveData = () => { /* ... same as before ... */ };
+            // Local Storage (ensure keys are correct or update if needed)
             const loadData = () => {
-                const storedLists = localStorage.getItem('shopSpotListsV3');
+                const storedLists = localStorage.getItem('shopSpotListsV3'); // Ensure using V3 or latest
                 const storedHistory = localStorage.getItem('shopSpotHistoryV3');
                 lists = storedLists ? JSON.parse(storedLists) : [];
                 historyLists = storedHistory ? JSON.parse(storedHistory) : [];
@@ -800,6 +803,7 @@
                 localStorage.setItem('shopSpotHistoryV3', JSON.stringify(historyLists));
             };
 
+
             // --- Screen Navigation ---
             const navigateTo = (screenName) => {
                 Object.values(screens).forEach(screen => screen.classList.remove('active'));
@@ -807,10 +811,15 @@
                 screens[screenName].classList.add('active');
                 if (navButtons[screenName]) navButtons[screenName].classList.add('active');
                 currentListId = (screenName === 'listDetail') ? currentListId : null;
-                showAddListModalBtn.style.display = (screenName === 'myLists') ? 'flex' : 'none';
+                // FAB visibility based on screen
+                fabButton.style.display = (screenName === 'myLists') ? 'flex' : 'none';
             };
 
             // --- Rendering Functions ---
+            const renderMyLists = () => { /* ... same as before ... */ };
+            const renderListDetail = () => { /* ... same as before ... */ };
+            const renderHistoryLists = () => { /* ... same as before ... */ };
+            // Rendering Functions (ensure these are complete from previous version)
             const renderMyLists = () => {
                 listsContainer.innerHTML = '';
                 if (lists.length === 0) {
@@ -854,7 +863,6 @@
                     listsContainer.appendChild(card);
                 });
             };
-
             const renderListDetail = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -894,7 +902,6 @@
                 }
                 updateTotalPrice();
             };
-
             const renderHistoryLists = () => {
                 historyListsContainer.innerHTML = '';
                 if (historyLists.length === 0) {
@@ -937,8 +944,10 @@
                 });
             };
 
+
             // --- Update Total Price ---
-            const updateTotalPrice = () => {
+            const updateTotalPrice = () => { /* ... same as before ... */ };
+             const updateTotalPrice = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 if (!list) return;
@@ -949,7 +958,16 @@
                 totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $${total.toFixed(2)}`;
             };
 
+
             // --- Modal Openers ---
+            const showAddListModal = () => { /* ... same, ensure icons set ... */ };
+            const showEditListNameModal = (listId) => { /* ... same, ensure icons set ... */ };
+            editListNameBtn.addEventListener('click', () => { /* ... same ... */ });
+            const showAddItemModal = () => { /* ... same, ensure icons set ... */ };
+            const showEditItemModal = (itemId) => { /* ... same, ensure icons set ... */ };
+            const showPriceModal = (itemId) => { /* ... same ... */ };
+            const confirmAction = (headerText, message, confirmBtnText, callback, icon = 'delete', confirmBtnIcon = 'check') => { /* ... same ... */ };
+            // Modal Openers (ensure these are complete from previous version, especially icon setting logic)
             const showAddListModal = () => {
                 editingListId = null;
                 setElementIcon(listNameModalTitle, 'add', 'prepend', 'Add New List');
@@ -958,7 +976,6 @@
                 displayModal(listNameModal);
                 listNameInput.focus();
             };
-
             const showEditListNameModal = (listId) => {
                 const list = lists.find(l => l.id === listId);
                 if (!list) return;
@@ -969,12 +986,9 @@
                 displayModal(listNameModal);
                 listNameInput.focus();
             };
-            
             editListNameBtn.addEventListener('click', () => {
                 if (currentListId) showEditListNameModal(currentListId);
             });
-
-
             const showAddItemModal = () => {
                 editingItemId = null;
                 setElementIcon(itemModalTitle, 'add', 'prepend', 'Add New Item');
@@ -982,17 +996,15 @@
                 itemWeightInput.value = '';
                 itemPriceInputModal.value = '';
                 itemPriceGroup.classList.add('hidden');
-                setButtonIcon(saveItemBtn, 'add', '', 'Add Item');
+                setButtonIcon(saveItemBtn, 'add', '', 'Add Item'); // or 'cart' icon
                 displayModal(itemModal);
                 itemNameInput.focus();
             };
-
             const showEditItemModal = (itemId) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 const item = list.items.find(i => i.id === itemId);
                 if (!item) return;
-
                 editingItemId = itemId;
                 setElementIcon(itemModalTitle, 'edit', 'prepend', 'Edit Item');
                 itemNameInput.value = item.name;
@@ -1003,20 +1015,18 @@
                 displayModal(itemModal);
                 itemNameInput.focus();
             };
-
             const showPriceModal = (itemId) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 const item = list.items.find(i => i.id === itemId);
                 if (!item) return;
-
                 itemToPriceId = itemId;
+                setElementIcon(priceModalHeader, 'priceTag', 'prepend', 'Enter Item Price'); // Ensure icon is set
                 priceModalItemName.textContent = `Item: ${item.name} (${item.weight})`;
                 itemPriceTickInput.value = item.price !== null ? parseFloat(item.price).toFixed(2) : '';
                 displayModal(priceModal);
                 itemPriceTickInput.focus();
             };
-
             const confirmAction = (headerText, message, confirmBtnText, callback, icon = 'delete', confirmBtnIcon = 'check') => {
                 setElementIcon(confirmModalHeaderEl, icon, 'prepend', headerText);
                 confirmMessage.textContent = message;
@@ -1026,6 +1036,11 @@
             };
 
             // --- List Operations ---
+            const saveList = () => { /* ... same ... */ };
+            const openListDetail = (listId) => { /* ... same ... */ };
+            const confirmDeleteList = (listId, listName) => { /* ... same ... */ };
+            deleteListBtn.addEventListener('click', () => { /* ... same ... */ });
+            // List Operations (ensure these are complete from previous version)
             const saveList = () => {
                 const name = listNameInput.value.trim();
                 if (!name) { alert('List name cannot be empty!'); return; }
@@ -1041,11 +1056,9 @@
                 if (currentListId === editingListId && editingListId) renderListDetail();
                 hideModal(listNameModal); editingListId = null;
             };
-
             const openListDetail = (listId) => {
                 currentListId = listId; renderListDetail(); navigateTo('listDetail');
             };
-
             const confirmDeleteList = (listId, listName) => {
                 confirmAction(
                     'Delete List?', `Move "${listName}" to History?`, 'Yes, Delete',
@@ -1060,7 +1073,6 @@
                     }, 'delete'
                 );
             };
-            
             deleteListBtn.addEventListener('click', () => {
                  if (currentListId) {
                     const list = lists.find(l => l.id === currentListId);
@@ -1070,6 +1082,11 @@
 
 
             // --- Item Operations ---
+            const saveItem = () => { /* ... same ... */ };
+            const toggleItemPurchased = (itemId, isChecked) => { /* ... same ... */ };
+            const saveItemPriceFromTick = () => { /* ... same ... */ };
+            const confirmDeleteItem = (itemId, itemName) => { /* ... same ... */ };
+            // Item Operations (ensure these are complete from previous version)
             const saveItem = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1092,7 +1109,6 @@
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
                 hideModal(itemModal); editingItemId = null;
             };
-
             const toggleItemPurchased = (itemId, isChecked) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1102,7 +1118,6 @@
                 if (isChecked && item.price === null) { showPriceModal(itemId); }
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists(); 
             };
-
             const saveItemPriceFromTick = () => {
                 if (!currentListId || !itemToPriceId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1113,7 +1128,6 @@
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
                 hideModal(priceModal); itemToPriceId = null;
             };
-
             const confirmDeleteItem = (itemId, itemName) => {
                 if (!currentListId) return;
                 confirmAction( 'Delete Item?', `Remove "${itemName}" from this list?`, 'Yes, Delete',
@@ -1127,7 +1141,11 @@
                 );
             };
 
+
             // --- History Operations ---
+            const restoreList = (listId) => { /* ... same ... */ };
+            const confirmPermanentDelete = (listId, listName) => { /* ... same ... */ };
+            // History Operations (ensure these are complete from previous version)
             const restoreList = (listId) => {
                 const listIndex = historyLists.findIndex(l => l.id === listId);
                 if (listIndex > -1) {
@@ -1136,7 +1154,6 @@
                     lists.push(listToRestore); saveData(); renderHistoryLists(); renderMyLists();
                 }
             };
-
             const confirmPermanentDelete = (listId, listName) => {
                 confirmAction(
                     'PERMANENTLY DELETE?', `"${listName}" will be gone forever. This cannot be undone.`,
@@ -1151,8 +1168,9 @@
                 setButtonIcon(confirmActionBtn, 'delete', '', 'Yes, Delete Forever');
             };
 
-
             // --- PDF Download ---
+            const downloadPDF = () => { /* ... same as before ... */ };
+            // PDF Download (ensure it's complete from previous version)
             const downloadPDF = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1189,17 +1207,41 @@
                  if (yPos > pageHeight - margin - 10) { doc.addPage(); yPos = margin; }
                 const total = list.items.reduce((sum, item) => sum + (item.price && item.purchased ? parseFloat(item.price) : 0), 0);
                 doc.setFontSize(12);
-                doc.text(`Total Purchased Price: $${total.toFixed(2)}`, margin, yPos); // Emoji removed
+                doc.text(`Total Purchased Price: $${total.toFixed(2)}`, margin, yPos);
 
                 doc.save(`${list.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_list.pdf`);
             };
+
+            // --- Ad and FAB Scroll Logic ---
+            const SCROLL_THRESHOLD = 50; // Pixels to scroll before showing ad
+            const AD_HEIGHT_PX = 90; // Must match CSS --ad-height if used in JS
+            const FAB_INITIAL_BOTTOM_PX = 20; // Must match CSS --fab-initial-bottom
+
+            function handleScroll() {
+                if (window.scrollY > SCROLL_THRESHOLD) {
+                    if (!adIsVisible) {
+                        bottomAdBanner.classList.add('ad-visible');
+                        fabButton.style.bottom = `${AD_HEIGHT_PX + FAB_INITIAL_BOTTOM_PX}px`;
+                        adIsVisible = true;
+                    }
+                } else {
+                    // Optional: Hide ad again if scrolled to top
+                    // if (adIsVisible) {
+                    //     bottomAdBanner.classList.remove('ad-visible');
+                    //     fabButton.style.bottom = `${FAB_INITIAL_BOTTOM_PX}px`;
+                    //     adIsVisible = false;
+                    // }
+                }
+            }
+            window.addEventListener('scroll', handleScroll, { passive: true });
+
 
             // --- Event Listeners ---
             navButtons.myLists.addEventListener('click', () => navigateTo('myLists'));
             navButtons.history.addEventListener('click', () => { renderHistoryLists(); navigateTo('history'); });
             backToListsBtn.addEventListener('click', () => navigateTo('myLists'));
 
-            showAddListModalBtn.addEventListener('click', showAddListModal);
+            fabButton.addEventListener('click', showAddListModal); // Changed from showAddListModalBtn
             saveListNameBtn.addEventListener('click', saveList);
             cancelListNameBtn.addEventListener('click', () => hideModal(listNameModal));
 
