@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shop Spot</title> <!-- SVG cart will be added by JS to header -->
+    <title>Shop Spot</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* --- Global Styles & Theme --- */
@@ -19,6 +19,7 @@
             --shadow: 0 2px 6px rgba(0,0,0,0.08);
             --premium-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
             --icon-color: var(--text-color);
+            --fab-initial-bottom: 20px; /* FAB's bottom spacing from viewport edge */
         }
 
         * {
@@ -29,7 +30,7 @@
         html, body {
             height: 100%;
             overflow-x: hidden;
-            background-color: var(--primary-bg); /* Ensure bg color for notch areas */
+            background-color: var(--primary-bg);
         }
 
         body {
@@ -67,36 +68,15 @@
             justify-content: center;
         }
         .app-header .app-title-text {
-             margin-right: 8px; /* Space before cart icon */
+             margin-right: 8px;
         }
-        .app-header svg { /* Cart icon in header */
+        .app-header svg {
             width: 1.2em; height: 1.2em;
             fill: white;
             vertical-align: -0.15em;
         }
 
-
-        /* --- Ad Placeholders --- */
-        .adsterra-banner {
-            /* Styles for the container of the ad */
-            /* background-color: #f0f0f0; /* You might remove this if ads have their own bg */
-            /* color: #999; */ /* You might remove this */
-            text-align: center;
-            /* padding: 10px; */ /* Ad script might control padding */
-            font-size: 0.8em;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
-            /* Ensure the ad itself is centered if it's smaller than the container */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 90px; /* Ad height */
-        }
-        .adsterra-banner.bottom {
-            border-top: 1px solid var(--border-color);
-            border-bottom: none;
-            margin-top: auto;
-        }
+        /* Ad Placeholders REMOVED */
 
 
         /* --- Navigation --- */
@@ -143,6 +123,7 @@
             padding: 15px;
             flex-grow: 1;
             overflow-y: auto;
+            padding-bottom: calc(var(--fab-initial-bottom) + 56px + 15px);
         }
 
         .screen.active {
@@ -156,6 +137,7 @@
             margin-bottom: 15px;
         }
 
+        /* List Styles, Item Styles, Buttons, FAB, Modals, Forms, List Detail Specifics, Utility - REMAINS THE SAME */
         /* --- List Styles --- */
         .list-card, .history-list-card {
             background-color: white;
@@ -306,7 +288,7 @@
             background-color: #e05252;
         }
 
-        #showAddItemModalBtn {
+        #showAddItemModalBtnListDetail {
             margin-top: 15px;
             width: auto;
             padding: 10px 25px;
@@ -318,8 +300,8 @@
 
         .fab {
             position: fixed;
-            bottom: 100px; /* Adjusted for potential bottom ad */
             right: 15px;
+            bottom: var(--fab-initial-bottom);
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -329,6 +311,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* No transition for bottom needed if not adjusting for ad */
         }
         .fab svg {
             width: 1em; height: 1em;
@@ -429,10 +412,10 @@
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
         }
-        .btn-header-icon { /* Back button styling */
+        .btn-header-icon {
             background: none;
             border: none;
-            color: var(--pastel-blue); /* Match title color for consistency */
+            color: var(--pastel-blue);
             font-size: 1.5em;
             cursor: pointer;
             padding: 5px;
@@ -447,16 +430,16 @@
             font-weight: 600;
             margin: 0;
             word-break: break-word;
-            text-align: left; /* Keep it left aligned */
+            text-align: left;
         }
         #listDetailScreen .list-detail-actions {
             display: flex;
             align-items: center;
-            margin-left: auto; /* Push actions to the far right */
+            margin-left: auto;
         }
         #listDetailScreen .list-detail-actions button {
-            margin-left: 8px; /* Space between action icons */
-            font-size: 1.4em; /* Slightly larger icons */
+            margin-left: 8px;
+            font-size: 1.4em;
         }
 
         .total-price-section {
@@ -494,19 +477,7 @@
             <span class="app-title-text">Shop Spot</span>
             <!-- Cart SVG will be appended by JS -->
         </header>
-        <div class="adsterra-banner">
-            <!-- Adsterra Top Banner Code -->
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : '893de7bca19abaf99c5c6ec6d939880d',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="//www.highperformanceformat.com/893de7bca19abaf99c5c6ec6d939880d/invoke.js"></script>
-        </div>
+        <!-- No Top Ad Banner -->
 
         <nav class="app-nav">
             <button class="nav-button active" id="navMyLists">
@@ -523,9 +494,6 @@
             <div id="listsContainer">
                 <p class="placeholder-text">No lists yet. Create one!</p>
             </div>
-            <button class="btn btn-primary fab" id="showAddListModalBtn" aria-label="Create New List">
-                <!-- Add Icon SVG -->
-            </button>
         </section>
 
         <!-- Screen: List Detail -->
@@ -544,7 +512,7 @@
             <div id="itemsContainer">
                 <p class="placeholder-text">No items in this list yet. Add some!</p>
             </div>
-            <button class="btn btn-primary" id="showAddItemModalBtn" style="margin-top: 15px;">
+            <button class="btn btn-primary" id="showAddItemModalBtnListDetail">
                 <!-- Add Icon SVG --> Add Item to List
             </button>
             <div class="total-price-section" id="totalPriceSection">
@@ -560,8 +528,12 @@
             </div>
         </section>
 
-        <!-- --- Modals --- -->
+        <button class="btn btn-primary fab" id="fabButton" aria-label="Create New List">
+            <!-- Add Icon SVG -->
+        </button>
 
+
+        <!-- Modals (structure remains the same) -->
         <div id="listNameModal" class="modal">
             <div class="modal-content">
                 <h3 class="modal-header" id="listNameModalTitle"><!-- Add/Edit SVG --> Add New List</h3>
@@ -632,25 +604,14 @@
             </div>
         </div>
 
-        <div class="adsterra-banner bottom">
-            <!-- Adsterra Bottom Banner Code -->
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : '893de7bca19abaf99c5c6ec6d939880d',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="//www.highperformanceformat.com/893de7bca19abaf99c5c6ec6d939880d/invoke.js"></script>
-        </div>
+        <!-- No Bottom Ad Banner Div -->
     </div> <!-- .app-container -->
 
+    <!-- No Popunder Ad Script -->
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const svgIcons = {
+            const svgIcons = { // SVG definitions remain the same
                 add: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>',
                 edit: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>',
                 delete: '<svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>',
@@ -675,9 +636,10 @@
             let editingItemId = null;
             let itemToPriceId = null;
             let actionCallback = null;
+            // let adIsVisible = false; // REMOVED - No ad visibility tracking needed
 
             // --- DOM Elements ---
-            const appHeaderEl = document.getElementById('appHeader');
+            const appHeaderEl = document.getElementById('appHeader'); // This will be null, but kept for structure if re-added
             const screens = {
                 myLists: document.getElementById('myListsScreen'),
                 listDetail: document.getElementById('listDetailScreen'),
@@ -689,12 +651,13 @@
             };
 
             const listsContainer = document.getElementById('listsContainer');
-            const showAddListModalBtn = document.getElementById('showAddListModalBtn');
+            const fabButton = document.getElementById('fabButton');
+            // const bottomAdBanner = document.getElementById('bottomAdBanner'); // REMOVED
 
             const backToListsBtn = document.getElementById('backToListsBtn');
             const listDetailNameEl = document.getElementById('listDetailName');
             const itemsContainer = document.getElementById('itemsContainer');
-            const showAddItemModalBtnListDetail = document.getElementById('showAddItemModalBtn');
+            const showAddItemModalBtnListDetail = document.getElementById('showAddItemModalBtnListDetail');
             const totalPriceSection = document.getElementById('totalPriceSection');
             const editListNameBtn = document.getElementById('editListNameBtn');
             const downloadListPdfBtn = document.getElementById('downloadListPdfBtn');
@@ -702,6 +665,7 @@
 
             const historyListsContainer = document.getElementById('historyListsContainer');
 
+            // Modals and their inner elements
             const listNameModal = document.getElementById('listNameModal');
             const listNameModalTitle = document.getElementById('listNameModalTitle');
             const listNameInput = document.getElementById('listNameInput');
@@ -732,15 +696,15 @@
 
             const { jsPDF } = window.jspdf;
 
-            // --- Icon Injection Function ---
+            // Icon injection functions
             function setButtonIcon(buttonElement, iconName, textBefore = '', textAfter = '') {
                 if (buttonElement && svgIcons[iconName]) {
                     buttonElement.innerHTML = `${textBefore ? textBefore + ' ' : ''}${svgIcons[iconName]}${textAfter ? ' ' + textAfter : ''}`;
-                } else if (buttonElement && textBefore === '' && textAfter === '') { // Only icon
+                } else if (buttonElement && textBefore === '' && textAfter === '') {
                      buttonElement.innerHTML = svgIcons[iconName] || '';
                 }
             }
-             function setElementIcon(element, iconName, position = 'prepend', textContent = null) {
+            function setElementIcon(element, iconName, position = 'prepend', textContent = null) {
                 if (element && svgIcons[iconName]) {
                     const currentText = textContent !== null ? textContent : element.textContent.trim();
                     if (position === 'prepend') {
@@ -751,29 +715,24 @@
                 }
             }
 
-
-            // --- Initialize Icons ---
+            // Initialize Icons
             function initializeStaticIcons() {
-                // App Header Title with Cart
-                const appTitleTextEl = appHeaderEl.querySelector('.app-title-text');
-                if (appTitleTextEl) {
-                    appTitleTextEl.insertAdjacentHTML('afterend', svgIcons.cart);
-                }
+                const appTitleTextEl = appHeaderEl.querySelector('.app-title-text'); // appHeaderEl is null, so this won't run
+                if (appTitleTextEl) { appTitleTextEl.insertAdjacentHTML('afterend', svgIcons.cart); }
 
                 setButtonIcon(navButtons.myLists, 'list', '', 'My Lists');
                 setButtonIcon(navButtons.history, 'history', '', 'History');
-                setButtonIcon(showAddListModalBtn, 'add');
+                setButtonIcon(fabButton, 'add');
                 setButtonIcon(backToListsBtn, 'backArrow');
                 setButtonIcon(editListNameBtn, 'edit');
                 setButtonIcon(downloadListPdfBtn, 'download');
                 setButtonIcon(deleteListBtn, 'delete');
                 setButtonIcon(showAddItemModalBtnListDetail, 'add', '', 'Add Item to List');
                 totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $0.00`;
-
-
                 setButtonIcon(saveListNameBtn, 'save', '', 'Save List');
                 setButtonIcon(cancelListNameBtn, 'cross', '', 'Cancel');
                 setButtonIcon(saveItemBtn, 'add', '', 'Add Item');
+                setButtonIcon(cancelItemBtn, 'cross', '', 'Cancel');
                 setElementIcon(priceModalHeader, 'priceTag', 'prepend', 'Enter Item Price');
                 setButtonIcon(savePriceBtn, 'check', '', 'Add Price');
                 setButtonIcon(cancelPriceBtn, 'cross', '', 'Skip');
@@ -781,36 +740,34 @@
                 setButtonIcon(cancelActionBtn, 'cross', '', 'No');
             }
 
-
-            // --- Utility Functions ---
+            // Utility Functions
             const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
             const displayModal = (modalEl) => { modalEl.style.display = 'flex'; };
             const hideModal = (modalEl) => { modalEl.style.display = 'none'; };
 
-            // --- Local Storage ---
+            // Local Storage
             const loadData = () => {
                 const storedLists = localStorage.getItem('shopSpotListsV3');
                 const storedHistory = localStorage.getItem('shopSpotHistoryV3');
                 lists = storedLists ? JSON.parse(storedLists) : [];
                 historyLists = storedHistory ? JSON.parse(storedHistory) : [];
             };
-
             const saveData = () => {
                 localStorage.setItem('shopSpotListsV3', JSON.stringify(lists));
                 localStorage.setItem('shopSpotHistoryV3', JSON.stringify(historyLists));
             };
 
-            // --- Screen Navigation ---
+            // Screen Navigation
             const navigateTo = (screenName) => {
                 Object.values(screens).forEach(screen => screen.classList.remove('active'));
                 Object.values(navButtons).forEach(button => button.classList.remove('active'));
                 screens[screenName].classList.add('active');
                 if (navButtons[screenName]) navButtons[screenName].classList.add('active');
                 currentListId = (screenName === 'listDetail') ? currentListId : null;
-                showAddListModalBtn.style.display = (screenName === 'myLists') ? 'flex' : 'none';
+                fabButton.style.display = (screenName === 'myLists') ? 'flex' : 'none';
             };
 
-            // --- Rendering Functions ---
+            // Rendering Functions (MyLists, ListDetail, History) - remain the same as previous full version
             const renderMyLists = () => {
                 listsContainer.innerHTML = '';
                 if (lists.length === 0) {
@@ -854,7 +811,6 @@
                     listsContainer.appendChild(card);
                 });
             };
-
             const renderListDetail = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -894,7 +850,6 @@
                 }
                 updateTotalPrice();
             };
-
             const renderHistoryLists = () => {
                 historyListsContainer.innerHTML = '';
                 if (historyLists.length === 0) {
@@ -937,19 +892,19 @@
                 });
             };
 
-            // --- Update Total Price ---
+
+            // Update Total Price
             const updateTotalPrice = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 if (!list) return;
-
                 const total = list.items.reduce((sum, item) => {
                     return sum + (item.price && item.purchased ? parseFloat(item.price) : 0);
                 }, 0);
                 totalPriceSection.innerHTML = `${svgIcons.shoppingBag} Total Price: $${total.toFixed(2)}`;
             };
 
-            // --- Modal Openers ---
+            // Modal Openers - remain the same
             const showAddListModal = () => {
                 editingListId = null;
                 setElementIcon(listNameModalTitle, 'add', 'prepend', 'Add New List');
@@ -958,7 +913,6 @@
                 displayModal(listNameModal);
                 listNameInput.focus();
             };
-
             const showEditListNameModal = (listId) => {
                 const list = lists.find(l => l.id === listId);
                 if (!list) return;
@@ -969,12 +923,9 @@
                 displayModal(listNameModal);
                 listNameInput.focus();
             };
-            
             editListNameBtn.addEventListener('click', () => {
                 if (currentListId) showEditListNameModal(currentListId);
             });
-
-
             const showAddItemModal = () => {
                 editingItemId = null;
                 setElementIcon(itemModalTitle, 'add', 'prepend', 'Add New Item');
@@ -986,13 +937,11 @@
                 displayModal(itemModal);
                 itemNameInput.focus();
             };
-
             const showEditItemModal = (itemId) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 const item = list.items.find(i => i.id === itemId);
                 if (!item) return;
-
                 editingItemId = itemId;
                 setElementIcon(itemModalTitle, 'edit', 'prepend', 'Edit Item');
                 itemNameInput.value = item.name;
@@ -1003,20 +952,18 @@
                 displayModal(itemModal);
                 itemNameInput.focus();
             };
-
             const showPriceModal = (itemId) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
                 const item = list.items.find(i => i.id === itemId);
                 if (!item) return;
-
                 itemToPriceId = itemId;
+                setElementIcon(priceModalHeader, 'priceTag', 'prepend', 'Enter Item Price');
                 priceModalItemName.textContent = `Item: ${item.name} (${item.weight})`;
                 itemPriceTickInput.value = item.price !== null ? parseFloat(item.price).toFixed(2) : '';
                 displayModal(priceModal);
                 itemPriceTickInput.focus();
             };
-
             const confirmAction = (headerText, message, confirmBtnText, callback, icon = 'delete', confirmBtnIcon = 'check') => {
                 setElementIcon(confirmModalHeaderEl, icon, 'prepend', headerText);
                 confirmMessage.textContent = message;
@@ -1025,7 +972,8 @@
                 displayModal(confirmModal);
             };
 
-            // --- List Operations ---
+
+            // List Operations - remain the same
             const saveList = () => {
                 const name = listNameInput.value.trim();
                 if (!name) { alert('List name cannot be empty!'); return; }
@@ -1041,11 +989,9 @@
                 if (currentListId === editingListId && editingListId) renderListDetail();
                 hideModal(listNameModal); editingListId = null;
             };
-
             const openListDetail = (listId) => {
                 currentListId = listId; renderListDetail(); navigateTo('listDetail');
             };
-
             const confirmDeleteList = (listId, listName) => {
                 confirmAction(
                     'Delete List?', `Move "${listName}" to History?`, 'Yes, Delete',
@@ -1060,7 +1006,6 @@
                     }, 'delete'
                 );
             };
-            
             deleteListBtn.addEventListener('click', () => {
                  if (currentListId) {
                     const list = lists.find(l => l.id === currentListId);
@@ -1068,8 +1013,7 @@
                 }
             });
 
-
-            // --- Item Operations ---
+            // Item Operations - remain the same
             const saveItem = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1092,7 +1036,6 @@
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
                 hideModal(itemModal); editingItemId = null;
             };
-
             const toggleItemPurchased = (itemId, isChecked) => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1102,7 +1045,6 @@
                 if (isChecked && item.price === null) { showPriceModal(itemId); }
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists(); 
             };
-
             const saveItemPriceFromTick = () => {
                 if (!currentListId || !itemToPriceId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1113,7 +1055,6 @@
                 list.updatedAt = Date.now(); saveData(); renderListDetail(); renderMyLists();
                 hideModal(priceModal); itemToPriceId = null;
             };
-
             const confirmDeleteItem = (itemId, itemName) => {
                 if (!currentListId) return;
                 confirmAction( 'Delete Item?', `Remove "${itemName}" from this list?`, 'Yes, Delete',
@@ -1127,7 +1068,7 @@
                 );
             };
 
-            // --- History Operations ---
+            // History Operations - remain the same
             const restoreList = (listId) => {
                 const listIndex = historyLists.findIndex(l => l.id === listId);
                 if (listIndex > -1) {
@@ -1136,7 +1077,6 @@
                     lists.push(listToRestore); saveData(); renderHistoryLists(); renderMyLists();
                 }
             };
-
             const confirmPermanentDelete = (listId, listName) => {
                 confirmAction(
                     'PERMANENTLY DELETE?', `"${listName}" will be gone forever. This cannot be undone.`,
@@ -1152,7 +1092,7 @@
             };
 
 
-            // --- PDF Download ---
+            // PDF Download - remains the same
             const downloadPDF = () => {
                 if (!currentListId) return;
                 const list = lists.find(l => l.id === currentListId);
@@ -1189,17 +1129,26 @@
                  if (yPos > pageHeight - margin - 10) { doc.addPage(); yPos = margin; }
                 const total = list.items.reduce((sum, item) => sum + (item.price && item.purchased ? parseFloat(item.price) : 0), 0);
                 doc.setFontSize(12);
-                doc.text(`Total Purchased Price: $${total.toFixed(2)}`, margin, yPos); // Emoji removed
+                doc.text(`Total Purchased Price: $${total.toFixed(2)}`, margin, yPos);
 
                 doc.save(`${list.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_list.pdf`);
             };
 
-            // --- Event Listeners ---
+
+            // Ad and FAB Scroll Logic - REMOVED as no ad to trigger visibility
+            // const SCROLL_THRESHOLD = 50;
+            // const AD_HEIGHT_PX = 90;
+            // const FAB_INITIAL_BOTTOM_PX = 20;
+            // function handleScroll() { /* ... REMOVED ... */ }
+            // window.removeEventListener('scroll', handleScroll, { passive: true }); // If it was added
+
+
+            // Event Listeners
             navButtons.myLists.addEventListener('click', () => navigateTo('myLists'));
             navButtons.history.addEventListener('click', () => { renderHistoryLists(); navigateTo('history'); });
             backToListsBtn.addEventListener('click', () => navigateTo('myLists'));
 
-            showAddListModalBtn.addEventListener('click', showAddListModal);
+            fabButton.addEventListener('click', showAddListModal);
             saveListNameBtn.addEventListener('click', saveList);
             cancelListNameBtn.addEventListener('click', () => hideModal(listNameModal));
 
@@ -1235,7 +1184,7 @@
                 modal.addEventListener('click', (e) => { if (e.target === modal) { hideModal(modal); } });
             });
 
-            // --- Initial Load ---
+            // Initial Load
             initializeStaticIcons();
             loadData();
             renderMyLists();
